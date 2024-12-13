@@ -23,7 +23,7 @@ public class Server {
             System.out.println("Server listening on port " + port);
             clientSocket = serverSocket.accept(); //metodo bloqueante. estabeleceu/aceitou a ligação com o cliente
             System.out.println("Connection accepted for client: " + clientSocket.getInetAddress() + " on port " +  clientSocket.getPort());
-            
+
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
