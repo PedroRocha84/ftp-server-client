@@ -19,8 +19,7 @@ public class Client {
 
         } catch (IOException e) {
             throw new RuntimeException(e);
-        }
-        finally {
+        } finally {
             closeResources();
         }
     }
@@ -28,21 +27,18 @@ public class Client {
     private void sendMessage() throws IOException {
         openStreams();
         scannerInput = new Scanner(System.in);
+        String message;
         while (true) {
-//            System.out.println(scannerInput.nextLine());
-            sendMessageToServer(readMessage());
+            message = readMessage();
+            sendMessageToServer(message);
             readMessageFromServer();
         }
     }
 
     private void readMessageFromServer() throws IOException {
         String clientMessage;
-        System.out.println("TESTE: readMessageFromServer");
         clientMessage = bufferedReader.readLine();
-        //VER O QUE FALTA AQUI PARA IMPRIMIR A MENMSAGEM QUE VEM SO SERVIDOR
         System.out.println(clientMessage);
-
-//
     }
 
     private void sendMessageToServer(String message) throws IOException {
@@ -50,17 +46,19 @@ public class Client {
         bufferedWriter.newLine();
         bufferedWriter.flush();
     }
+
     private String readMessage() {
         return scannerInput.nextLine();
     }
 
-    private void closeResources(){
+    private void closeResources() {
         try {
             socket.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
+
     private void openStreams() {
         try {
             bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
