@@ -82,13 +82,25 @@ public class Server {
                     requestFileName();
                     break;
                 case "MKDIR":
-                    text = "Create a directory on the server";
+                    String folderName;
+                    folderName = bufferedReader.readLine();
+                    makeNewDir(folderName);
                     System.out.println("Create a directory on the server");
                     break;
                 default:
             }
 
         }
+    }
+
+    private void makeNewDir(String folderName) throws FileNotFoundException {
+        System.out.println("Folder name: " + folderName);
+        File theDir = new File("serverRoot" + File.separator + folderName);
+        if (!theDir.exists()){
+            theDir.mkdirs();
+            System.out.println("I'm inside the dir");
+        }
+
     }
 
     private void requestFileName() throws IOException {

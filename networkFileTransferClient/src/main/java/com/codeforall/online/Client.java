@@ -97,6 +97,16 @@ public class Client {
                 System.out.println("File created");
             }
 
+            if(message.equalsIgnoreCase("MKDIR")){
+                System.out.println("Please write the directory name and press enter:");
+                String fileName = null;
+
+                while (fileName == null){
+                    fileName = scannerInput.nextLine();
+                }
+                sendMessageToServer(fileName);
+            }
+
         }
     }
 
@@ -134,7 +144,6 @@ public class Client {
         }
 
         String destination = "clientRoot/" + fileName;
-        System.out.println(destination);
 
         inStream = new BufferedInputStream(socket.getInputStream());
         outStream = new FileOutputStream(destination);
@@ -149,7 +158,7 @@ public class Client {
             }
             outStream.write(buffer, 0, bytesRead);
             bytesRead = inStream.read(buffer);
-            System.out.println(bytesRead);
+        //  System.out.println(bytesRead);
         }
     }
 
