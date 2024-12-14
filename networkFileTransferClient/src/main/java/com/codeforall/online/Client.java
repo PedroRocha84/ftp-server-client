@@ -31,7 +31,7 @@ public class Client {
         String message;
 
         while (true) {
-            message = readMessage();
+            message = readMessage(); // Retorno do Scanner = Terminal
             System.out.println(message);
             sendMessageToServer(message);
             //readMessageFromServer();
@@ -54,6 +54,22 @@ public class Client {
 
             }
 
+            if(message.equalsIgnoreCase("LS")){
+                String serverMessage;
+                System.out.println("List of files on server:");
+                while ((serverMessage = bufferedReader.readLine()) != null
+                        && !serverMessage.equals("no files"))
+                    System.out.println( "  -> " + serverMessage);
+                }
+
+            if(message.equalsIgnoreCase("PUT")){
+                System.out.println("Please specify the filename:");
+                String userInput;
+                while ((userInput = readMessage()) != null ) {
+                    System.out.println("FIlename is: " + userInput);
+                }
+
+            }
         }
     }
 

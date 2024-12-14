@@ -3,6 +3,10 @@ package com.codeforall.online;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 
 public class Server {
     private ServerSocket serverSocket;
@@ -10,9 +14,6 @@ public class Server {
     private int port;
     private BufferedReader bufferedReader;
     private BufferedWriter bufferedWriter;
-
-    private FileInputStream fileInput;
-    private FileOutputStream fileOutput;
 
     public Server(int port) {
         try {
@@ -68,14 +69,16 @@ public class Server {
                     help();
                     break;
                 case "LS":
-                    text = "List files available on the server";
                     System.out.println("List files available on the server");
+                    listFiles();
                     break;
                 case "PUT":
-                    text = "Upload a file to the server";
+                    requestFileName();
+                    uploadToServer();
                     System.out.println("Upload a file to the server");
                     break;
                 case "GET":
+                    requestFileName();
                     text = "Get a file from the server";
                     System.out.println("Get a file from the server");
                     break;
@@ -87,6 +90,43 @@ public class Server {
             }
 
         }
+    }
+
+    private void requestFileName() throws IOException {
+        String message = "Specify the file name and press enter.";
+        writeMessageToClient(message);
+    }
+
+    private void uploadToServer() throws IOException {
+        // Estar à escuta para receber o nome do ficheiro
+        String fileName;
+        fileName = bufferedReader.readLine();
+
+        while(fileName != null){
+            System.out.println("Filename method upload server : " + fileName);
+        }
+        //Após receber eu posso começar a escrever
+
+        //FileWriter writer = new FileWriter(fileName);
+
+    }
+
+    private void listFiles() throws IOException {
+        String folderPath = "serverRoot";
+
+        File directory = new File(folderPath);
+        File[] files = directory.listFiles();
+
+        if(files != null) {
+            for(File fileInFolder: files){
+                if(fileInFolder.isFile()){
+                    System.out.println(fileInFolder.getName());
+                    writeMessageToClient(fileInFolder.getName());
+                }
+            }
+        }
+        writeMessageToClient("no files");
+
     }
 
     private void help() {
@@ -103,29 +143,12 @@ public class Server {
             e.printStackTrace(); // Handle exceptions appropriately
         }
 
-
-/*        try {
-            fileInput = new FileInputStream("src/main/resources/listCommands.txt");
-
-            byte[] buffer = new byte[1024];
-            int bytesRead = fileInput.read(buffer);
-
-            while (bytesRead != -1) {
-                writeMessageToClient(fileInput.toString());
-                bytesRead = fileInput.read(buffer);
-            }
-
-        } catch (IOException e) {
-            System.out.println("Error loading file ... ");
-        }*/
-
     }
 
     private void exit() {
         closeResources();
         System.exit(0);
     }
-
 
     public void writeMessageToClient(String message) throws IOException {
         bufferedWriter.write(message);
