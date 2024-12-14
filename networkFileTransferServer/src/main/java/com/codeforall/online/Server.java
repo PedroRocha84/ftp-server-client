@@ -15,6 +15,8 @@ public class Server {
     private BufferedInputStream in;
     private FileOutputStream out;
 
+    private FileInputStream inStream;
+    private BufferedOutputStream outStream;
     public Server(int port) {
         try {
             serverSocket = new ServerSocket(port);
@@ -78,8 +80,6 @@ public class Server {
                     break;
                 case "GET":
                     requestFileName();
-                    text = "Get a file from the server";
-                    System.out.println("Get a file from the server");
                     break;
                 case "MKDIR":
                     text = "Create a directory on the server";
@@ -92,10 +92,34 @@ public class Server {
     }
 
     private void requestFileName() throws IOException {
-        String message = "Specify the file name and press enter.";
-        writeMessageToClient(message);
+
+        String filename = null;
+        while (filename == null) {
+            filename = bufferedReader.readLine();
+        }
+
+        System.out.println("Get Method - Filename is: " + filename);
+
+        readFile(filename);
     }
 
+    private void readFile(String source) throws IOException {
+
+        inStream = new FileInputStream("serverRoot/" +source);
+        outStream = new BufferedOutputStream(clientSocket.getOutputStream());
+
+        byte[] buffer = new byte[1024];
+
+        int bytesRead = inStream.read(buffer);
+
+        while(bytesRead != -1) {
+            outStream.write(buffer, 0, bytesRead);
+            bytesRead = inStream.read(buffer);
+        }
+
+        outStream.flush();
+        inStream.close();
+    }
     private void receiveFile() throws IOException {
         String fileName = null;
         while (fileName == null) {

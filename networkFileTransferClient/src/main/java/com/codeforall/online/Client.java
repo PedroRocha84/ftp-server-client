@@ -13,6 +13,9 @@ public class Client {
     private FileInputStream in;
     private BufferedOutputStream out;
 
+    private BufferedInputStream inStream;
+    private FileOutputStream outStream;
+
     public Client(String host, int port) {
         try {
             socket = new Socket(host, port);
@@ -59,7 +62,9 @@ public class Client {
                 String serverMessage;
                 System.out.println("List of files on server:");
                 while ((serverMessage = bufferedReader.readLine()) != null) {
-                    System.out.println("  -> " + serverMessage);
+                    if(!serverMessage.equals("no files")){
+                        System.out.println("  -> " + serverMessage);
+                    }
                     if(serverMessage.equals("no files")){
                         break;
                     }
@@ -73,14 +78,31 @@ public class Client {
                 while ((userInput = readMessage()) != null ) {
                     System.out.println("Filename is: " + userInput);
                     sendFileName( userInput);
-                    readFile("clientRoot/" + userInput);
+                    readFile( userInput);
                     break;
                 }
             }
 
+            if(message.equalsIgnoreCase("GET")) {
+                System.out.println("Please write the filename and press enter:");
+                String fileName = null; // nome do ficheiro que vamos que vamos pedir ao server
 
+                while (fileName == null){
+                    fileName = scannerInput.nextLine();
+                }
+
+                System.out.println(fileName);
+                requestFile(fileName);
+                receiveFile(fileName);
+                System.out.println("File created");
+            }
 
         }
+    }
+
+    private void requestFile(String fileName) throws IOException {
+        sendMessageToServer(fileName);
+
     }
 
     private void sendFileName(String userInput) throws IOException {
@@ -89,8 +111,7 @@ public class Client {
 
     private void readFile(String source) throws IOException {
 
-
-        in = new FileInputStream(source);
+        in = new FileInputStream("clientRoot/" + source);
         out = new BufferedOutputStream(socket.getOutputStream());
 
         byte[] buffer = new byte[1024];
@@ -104,6 +125,32 @@ public class Client {
 
         out.flush();
         in.close();
+    }
+
+    private void receiveFile(String fileName) throws IOException {
+
+        if(fileName == null){
+            return;
+        }
+
+        String destination = "clientRoot/" + fileName;
+        System.out.println(destination);
+
+        inStream = new BufferedInputStream(socket.getInputStream());
+        outStream = new FileOutputStream(destination);
+
+        byte[] buffer = new byte[1024];
+
+        int bytesRead = inStream.read(buffer);
+
+        while (bytesRead != -1) {
+            if (bytesRead < buffer.length) {
+                break;
+            }
+            outStream.write(buffer, 0, bytesRead);
+            bytesRead = inStream.read(buffer);
+            System.out.println(bytesRead);
+        }
     }
 
     private void exit() {
