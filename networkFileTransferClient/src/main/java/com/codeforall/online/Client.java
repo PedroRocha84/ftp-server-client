@@ -15,24 +15,51 @@ public class Client {
         try {
             socket = new Socket(host, port);
             System.out.println("Connected to " + host + ":" + port);
+            scannerInput = new Scanner(System.in);
             sendMessage();
 
         } catch (IOException e) {
             throw new RuntimeException(e);
-        } finally {
+        } /*finally {  // >Codigo retirado para evitar fecho da stream apos cada mensagem
             closeResources();
-        }
+        }*/
     }
 
     private void sendMessage() throws IOException {
         openStreams();
-        scannerInput = new Scanner(System.in);
+
         String message;
+
         while (true) {
             message = readMessage();
+            System.out.println(message);
             sendMessageToServer(message);
-            readMessageFromServer();
+            //readMessageFromServer();
+
+            if(message.equalsIgnoreCase("BYE")
+                    || message.equalsIgnoreCase("DISCONNECT")
+                    || message.equalsIgnoreCase("QUIT")) {
+                readMessageFromServer();
+                exit();
+            }
+
+            if (message.equalsIgnoreCase("HELP")) {
+                String serverMessage;
+                while ((serverMessage = bufferedReader.readLine()) != null) {
+                    System.out.println(serverMessage);
+                    if(serverMessage.equals("#")){
+                        break;
+                    }
+                }
+
+            }
+
         }
+    }
+
+    private void exit() {
+        closeResources();
+        System.exit(0);
     }
 
     private void readMessageFromServer() throws IOException {

@@ -11,6 +11,9 @@ public class Server {
     private BufferedReader bufferedReader;
     private BufferedWriter bufferedWriter;
 
+    private FileInputStream fileInput;
+    private FileOutputStream fileOutput;
+
     public Server(int port) {
         try {
             serverSocket = new ServerSocket(port);
@@ -25,12 +28,14 @@ public class Server {
             System.out.println("Server listening on port " + port);
             clientSocket = serverSocket.accept(); //metodo bloqueante. estabeleceu/aceitou a ligação com o cliente
             System.out.println("Connection accepted for client: " + clientSocket.getInetAddress() + " on port " +  clientSocket.getPort());
-            handleRequest();
+            while(true) {
+                handleRequest();
+            }
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
+        } /*finally {
             closeResources();
-        }
+        }*/
     }
 
     private void handleRequest() throws IOException {
@@ -39,22 +44,28 @@ public class Server {
         String text = null;
 
         while((message = bufferedReader.readLine()) != null) {
-            switch(message) {
+            switch(message.toUpperCase()) {
                 case "BYE":
                     text = "Terminate the connection";
                     System.out.println("Terminate the connection");
-                    break;
+                    writeMessageToClient(text);
+                    exit();
+
                 case "DISCONNECT":
                     text = "Terminate the connection";
                     System.out.println("Terminate the connection");
+                    writeMessageToClient(text);
+                    exit();
                     break;
                 case "QUIT":
                     text = "Terminate the connection";
                     System.out.println("Terminate the connection");
+                    writeMessageToClient(text);
+                    exit();
                     break;
                 case "HELP":
-                    text = "See available commands";
-                    System.out.println("See available commands");
+                    System.out.println("Command: Help - See available commands");
+                    help();
                     break;
                 case "LS":
                     text = "List files available on the server";
@@ -74,8 +85,45 @@ public class Server {
                     break;
                 default:
             }
-            writeMessageToClient(text);
+
         }
+    }
+
+    private void help() {
+
+        try {
+            FileReader reader = new FileReader("src/main/resources/listCommands.txt");
+            BufferedReader fileReader = new BufferedReader(reader);
+
+            String line;
+            while ((line = fileReader.readLine()) != null) {
+                writeMessageToClient(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace(); // Handle exceptions appropriately
+        }
+
+
+/*        try {
+            fileInput = new FileInputStream("src/main/resources/listCommands.txt");
+
+            byte[] buffer = new byte[1024];
+            int bytesRead = fileInput.read(buffer);
+
+            while (bytesRead != -1) {
+                writeMessageToClient(fileInput.toString());
+                bytesRead = fileInput.read(buffer);
+            }
+
+        } catch (IOException e) {
+            System.out.println("Error loading file ... ");
+        }*/
+
+    }
+
+    private void exit() {
+        closeResources();
+        System.exit(0);
     }
 
 
@@ -98,7 +146,7 @@ public class Server {
     private void closeResources() {
         try {
             clientSocket.close();
-            //serverSocket.close();
+            serverSocket.close();
             bufferedWriter.close();
             bufferedReader.close();
         } catch (IOException e) {
