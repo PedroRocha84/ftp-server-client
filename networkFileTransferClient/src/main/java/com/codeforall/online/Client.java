@@ -10,6 +10,8 @@ public class Client {
     private BufferedWriter bufferedWriter;
     private Scanner scannerInput;
 
+    private FileInputStream in;
+    private BufferedOutputStream out;
 
     public Client(String host, int port) {
         try {
@@ -51,26 +53,57 @@ public class Client {
                         break;
                     }
                 }
-
             }
 
-            if(message.equalsIgnoreCase("LS")){
+            if(message.equalsIgnoreCase("LS")) {
                 String serverMessage;
                 System.out.println("List of files on server:");
-                while ((serverMessage = bufferedReader.readLine()) != null
-                        && !serverMessage.equals("no files"))
-                    System.out.println( "  -> " + serverMessage);
+                while ((serverMessage = bufferedReader.readLine()) != null) {
+                    System.out.println("  -> " + serverMessage);
+                    if(serverMessage.equals("no files")){
+                        break;
+                    }
                 }
+            }
+
 
             if(message.equalsIgnoreCase("PUT")){
                 System.out.println("Please specify the filename:");
                 String userInput;
                 while ((userInput = readMessage()) != null ) {
-                    System.out.println("FIlename is: " + userInput);
+                    System.out.println("Filename is: " + userInput);
+                    sendFileName( userInput);
+                    readFile("clientRoot/" + userInput);
+                    break;
                 }
-
             }
+
+
+
         }
+    }
+
+    private void sendFileName(String userInput) throws IOException {
+        sendMessageToServer(userInput); // Estou a mandar o nome do ficheiro
+    }
+
+    private void readFile(String source) throws IOException {
+
+
+        in = new FileInputStream(source);
+        out = new BufferedOutputStream(socket.getOutputStream());
+
+        byte[] buffer = new byte[1024];
+
+        int bytesRead = in.read(buffer);
+
+        while(bytesRead != -1) {
+            out.write(buffer, 0, bytesRead);
+            bytesRead = in.read(buffer);
+        }
+
+        out.flush();
+        in.close();
     }
 
     private void exit() {

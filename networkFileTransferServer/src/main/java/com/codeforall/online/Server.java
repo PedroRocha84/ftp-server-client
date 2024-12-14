@@ -3,9 +3,6 @@ package com.codeforall.online;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 
 public class Server {
@@ -14,6 +11,9 @@ public class Server {
     private int port;
     private BufferedReader bufferedReader;
     private BufferedWriter bufferedWriter;
+
+    private BufferedInputStream in;
+    private FileOutputStream out;
 
     public Server(int port) {
         try {
@@ -28,8 +28,8 @@ public class Server {
         try {
             System.out.println("Server listening on port " + port);
             clientSocket = serverSocket.accept(); //metodo bloqueante. estabeleceu/aceitou a ligação com o cliente
-            System.out.println("Connection accepted for client: " + clientSocket.getInetAddress() + " on port " +  clientSocket.getPort());
-            while(true) {
+            System.out.println("Connection accepted for client: " + clientSocket.getInetAddress() + " on port " + clientSocket.getPort());
+            while (true) {
                 handleRequest();
             }
         } catch (IOException e) {
@@ -44,8 +44,8 @@ public class Server {
         String message;
         String text = null;
 
-        while((message = bufferedReader.readLine()) != null) {
-            switch(message.toUpperCase()) {
+        while ((message = bufferedReader.readLine()) != null) {
+            switch (message.toUpperCase()) {
                 case "BYE":
                     text = "Terminate the connection";
                     System.out.println("Terminate the connection");
@@ -73,8 +73,7 @@ public class Server {
                     listFiles();
                     break;
                 case "PUT":
-                    requestFileName();
-                    uploadToServer();
+                    receiveFile();
                     System.out.println("Upload a file to the server");
                     break;
                 case "GET":
@@ -97,18 +96,30 @@ public class Server {
         writeMessageToClient(message);
     }
 
-    private void uploadToServer() throws IOException {
-        // Estar à escuta para receber o nome do ficheiro
-        String fileName;
-        fileName = bufferedReader.readLine();
-
-        while(fileName != null){
-            System.out.println("Filename method upload server : " + fileName);
+    private void receiveFile() throws IOException {
+        String fileName = null;
+        while (fileName == null) {
+            fileName = bufferedReader.readLine();
         }
-        //Após receber eu posso começar a escrever
 
-        //FileWriter writer = new FileWriter(fileName);
+        String destination = "serverRoot/" + fileName;
+        System.out.println(destination);
 
+        in = new BufferedInputStream(clientSocket.getInputStream());
+        out = new FileOutputStream(destination);
+
+        byte[] buffer = new byte[1024];
+
+        int bytesRead = in.read(buffer);
+
+        while (bytesRead != -1) {
+            if (bytesRead < buffer.length) {
+                break;
+            }
+            out.write(buffer, 0, bytesRead);
+            bytesRead = in.read(buffer);
+            System.out.println(bytesRead);
+        }
     }
 
     private void listFiles() throws IOException {
@@ -117,16 +128,15 @@ public class Server {
         File directory = new File(folderPath);
         File[] files = directory.listFiles();
 
-        if(files != null) {
-            for(File fileInFolder: files){
-                if(fileInFolder.isFile()){
+        if (files != null) {
+            for (File fileInFolder : files) {
+                if (fileInFolder.isFile()) {
                     System.out.println(fileInFolder.getName());
                     writeMessageToClient(fileInFolder.getName());
                 }
             }
         }
         writeMessageToClient("no files");
-
     }
 
     private void help() {
