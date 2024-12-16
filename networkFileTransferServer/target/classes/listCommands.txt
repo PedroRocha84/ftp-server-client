@@ -1,0 +1,11 @@
+######### HELP MENU ########
+List of commands available
+ BYE        -> Terminate the connection
+ DISCONNECT -> Terminate the connection
+ QUIT       -> Terminate the connection
+ HELP       -> See available commands
+ LS         -> List files available on the server
+ PUT        -> Upload a file to the server
+ GET        -> Get a file from the server
+ MKDIR      -> Create a directory on the server
+Please choose one from the list ...
