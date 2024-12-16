@@ -25,7 +25,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.codeforall.online.client.Main</mainClass> <!-- path to the main class of your project -->
+                            <mainClass>com.codeforall.online.Main</mainClass> <!-- path to the main class of your project -->
                         </manifest>
                     </archive>
                     <descriptorRefs>
