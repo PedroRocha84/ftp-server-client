@@ -17,6 +17,8 @@ public class Client {
     private BufferedInputStream inStream;
     private FileOutputStream outStream;
 
+    private String fileName = null;
+
     public Client(String host, int port) {
         try {
             socket = new Socket(host, port);
@@ -45,62 +47,96 @@ public class Client {
             }
 
             if (message.equalsIgnoreCase("HELP")) {
-                String serverMessage = "";
-                while (serverMessage != null) {
-                    serverMessage = bufferedReader.readLine();
-                    System.out.println(serverMessage);
-                    if (Objects.equals(serverMessage, "")) {
-                        break;
-                    }
-                }
+                helpCommand();
             }
 
             if (message.equalsIgnoreCase("LS")) {
-                String serverMessage;
-                System.out.println("List of files on server:");
-                while ((serverMessage = bufferedReader.readLine()) != null) {
-                    if (!serverMessage.equals("no files")) {
-                        System.out.println("  -> " + serverMessage);
-                    }
-                    if (serverMessage.equals("no files")) {
-                        break;
-                    }
-                }
+                lsCommand();
             }
 
             if (message.equalsIgnoreCase("PUT")) {
-                System.out.println("Please specify the filename:");
-                String userInput;
-                while ((userInput = readMessage()) != null) {
-                    System.out.println("Filename is: " + userInput);
-                    sendFileName(userInput);
-                    readFile(userInput);
-                    break;
-                }
+               putCommand();
             }
 
             if (message.equalsIgnoreCase("GET")) {
-                System.out.println("Please write the filename and press enter:");
-                String fileName = null;
-
-                while (fileName == null) {
-                    fileName = scannerInput.nextLine();
-                }
-                System.out.println(fileName);
-                requestFile(fileName);
-                receiveFile(fileName);
-                System.out.println("File created");
+               getFileCommand();
             }
 
             if (message.equalsIgnoreCase("MKDIR")) {
-                System.out.println("Please write the directory name and press enter:");
-                String fileName = null;
-
-                while (fileName == null) {
-                    fileName = scannerInput.nextLine();
-                }
-                sendMessageToServer(fileName);
+               mkdirCommand();
             }
+        }
+    }
+
+    private void mkdirCommand() {
+        getFileName();
+        sendMessageToServer(fileName);
+    }
+
+    private void getFileCommand() {
+        try {
+            getFileName();
+            System.out.println("File name is: " + fileName);
+            requestFile(fileName);
+            receiveFile(fileName);
+            System.out.println("File created");
+        } catch (IOException e) {
+            System.err.println("Could not receive file");
+        }
+    }
+
+    private void putCommand() {
+        try {
+            System.out.println("Please specify the filename:");
+            String userInput;
+            while ((userInput = readMessage()) != null) {
+                System.out.println("Filename is: " + userInput);
+                sendFileName(userInput);
+                readFile(userInput);
+                break;
+            }
+        } catch (IOException e) {
+            System.err.println("Could not read file");
+        }
+    }
+
+    private void lsCommand() {
+        try {
+            String serverMessage;
+            System.out.println("List of files on server:");
+            while ((serverMessage = bufferedReader.readLine()) != null) {
+                if (!serverMessage.equals("no files")) {
+                    System.out.println("  -> " + serverMessage);
+                }
+                if (serverMessage.equals("no files")) {
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Could not list files from server");
+        }
+    }
+
+    private void helpCommand() {
+        try {
+            String serverMessage = "";
+            while (serverMessage != null) {
+                serverMessage = bufferedReader.readLine();
+                System.out.println(serverMessage);
+                if (Objects.equals(serverMessage, "")) {
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Could not read message from the server");
+        }
+    }
+
+    private void getFileName() {
+        System.out.println("Please write the directory name and press enter: ");
+
+        while (this.fileName == null) {
+            this.fileName = scannerInput.nextLine();
         }
     }
 
